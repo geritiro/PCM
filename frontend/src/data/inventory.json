@@ -2,146 +2,60 @@
   "lastUpdate": "2025-01-25",
   "equipment": [
     {
-      "code": "C05",
-      "name": "CUBO500",
+      "code": "CUBO-C1",
+      "name": "CUBO C1",
       "type": "Máquina",
-      "power": 3,
-      "sector": "Homogenização",
-      "manufacturingYear": 2000,
-      "energyCostPerHour": 1.58
-    },
-    {
-      "code": "RFA",
-      "name": "Extrusora RF (A)",
-      "type": "Máquina",
-      "power": 50,
-      "sector": "Extrusão",
-      "manufacturingYear": 2005,
-      "energyCostPerHour": 26.25
-    },
-    {
-      "code": "TT-B",
-      "name": "Extrusora TT (B)",
-      "type": "Máquina",
-      "power": 20,
-      "sector": "Extrusão",
-      "manufacturingYear": 2004,
-      "energyCostPerHour": 10.50
-    },
-    {
-      "code": "M10",
-      "name": "ACM10",
-      "type": "Máquina",
-      "power": 10,
-      "sector": "Moagem",
-      "manufacturingYear": 2025,
-      "energyCostPerHour": 5.25
-    },
-    {
-      "code": "M40",
-      "name": "ACM40",
-      "type": "Máquina",
-      "power": 30,
-      "sector": "Moagem",
-      "manufacturingYear": 2000,
-      "energyCostPerHour": 15.75
-    },
-    {
-      "code": "CHI-01",
-      "name": "Chiller (NOVO)",
-      "type": "Máquina",
+      "sector": "Produção",
+      "manufacturingYear": 2020,
       "power": null,
-      "sector": "Refrigeração",
-      "manufacturingYear": 2024,
       "energyCostPerHour": null
     },
     {
-      "code": "CHI-02",
-      "name": "Chiller 02",
+      "code": "PRENSA-P2",
+      "name": "PRENSA P2",
       "type": "Máquina",
+      "sector": "Produção",
+      "manufacturingYear": 2019,
       "power": null,
-      "sector": "Refrigeração",
-      "manufacturingYear": 2004,
       "energyCostPerHour": null
     },
     {
-      "code": "BT400",
-      "name": "Betoneira",
-      "type": "Equipamento",
-      "power": 3,
-      "sector": "Geral",
+      "code": "TORNO-T3",
+      "name": "TORNO T3",
+      "type": "Máquina",
+      "sector": "Usinagem",
       "manufacturingYear": 2018,
-      "energyCostPerHour": 1.58
-    },
-    {
-      "code": "EXA-30",
-      "name": "Exaustor 30",
-      "type": "Máquina",
-      "power": 30,
-      "sector": "Moagem",
-      "manufacturingYear": 2025,
-      "energyCostPerHour": 15.75
-    },
-    {
-      "code": "PNR40",
-      "name": "Peneira Classificadora 40",
-      "type": "Máquina",
       "power": null,
-      "sector": "Moagem",
-      "manufacturingYear": 2004,
       "energyCostPerHour": null
     },
     {
-      "code": "FILT40",
-      "name": "Filtro de Manga 40",
+      "code": "FRESA-F1",
+      "name": "FRESA F1",
       "type": "Máquina",
+      "sector": "Usinagem",
+      "manufacturingYear": 2021,
       "power": null,
-      "sector": "Moagem",
-      "manufacturingYear": 2018,
       "energyCostPerHour": null
     },
     {
-      "code": "ALIACM40",
-      "name": "Alimentador ACM40",
+      "code": "RET-R2",
+      "name": "RETÍFICA R2",
       "type": "Máquina",
+      "sector": "Acabamento",
+      "manufacturingYear": 2020,
       "power": null,
-      "sector": "Moagem",
-      "manufacturingYear": 1974,
-      "energyCostPerHour": null
-    },
-    {
-      "code": "PAL01",
-      "name": "Paleteira 01",
-      "type": "Equipamento",
-      "power": null,
-      "sector": "Logística",
-      "manufacturingYear": 2025,
-      "energyCostPerHour": null
-    },
-    {
-      "code": "EST-MT",
-      "name": "Esteira MT",
-      "type": "Máquina",
-      "power": null,
-      "sector": "Transporte",
-      "manufacturingYear": 2005,
       "energyCostPerHour": null
     }
   ],
   "statistics": {
-    "totalEquipment": 14,
+    "totalEquipment": 5,
     "byType": {
-      "Máquina": 12,
-      "Equipamento": 2
+      "Máquina": 5
     },
     "bySector": {
-      "Homogenização": 1,
-      "Extrusão": 2,
-      "Moagem": 6,
-      "Refrigeração": 2,
-      "Geral": 1,
-      "Logística": 1,
-      "Transporte": 1
+      "Produção": 2,
+      "Usinagem": 2,
+      "Acabamento": 1
     }
   }
 }

@@ -1,174 +1,113 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { ThemeProvider as MuiThemeProvider, createTheme, Theme } from '@mui/material/styles';
+import React, { createContext, useContext, useMemo } from 'react';
+import { ThemeProvider as MuiThemeProvider, createTheme, Theme } from '@mui/material';
 import { CssBaseline } from '@mui/material';
 
 interface ThemeContextType {
-  isDarkMode: boolean;
-  toggleTheme: () => void;
   theme: Theme;
 }
 
-const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-    primary: {
-      main: '#1976d2',
-      light: '#42a5f5',
-      dark: '#1565c0',
-      contrastText: '#ffffff',
-    },
-    secondary: {
-      main: '#9c27b0',
-      light: '#ba68c8',
-      dark: '#7b1fa2',
-      contrastText: '#ffffff',
-    },
-    background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
-    },
-    text: {
-      primary: '#000000',
-      secondary: 'rgba(0, 0, 0, 0.6)',
-    },
-  },
-  components: {
-    MuiButtonBase: {
-      styleOverrides: {
-        root: {
-          '&:focus': {
-            outline: 'none',
-          },
-        },
-      },
-      defaultProps: {
-        disableRipple: true,
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          '&:focus': {
-            outline: 'none',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          '&:focus': {
-            outline: 'none',
-            boxShadow: 'none',
-          },
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#1976d2',
-        },
-      },
-    },
-  },
-});
+const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-    primary: {
-      main: '#90caf9',
-      light: '#e3f2fd',
-      dark: '#42a5f5',
-      contrastText: '#000000',
-    },
-    secondary: {
-      main: '#ce93d8',
-      light: '#f3e5f5',
-      dark: '#ab47bc',
-      contrastText: '#000000',
-    },
-    background: {
-      default: '#121212',
-      paper: '#1e1e1e',
-    },
-    text: {
-      primary: '#ffffff',
-      secondary: 'rgba(255, 255, 255, 0.7)',
-    },
-  },
-  components: {
-    MuiButtonBase: {
-      styleOverrides: {
-        root: {
-          '&:focus': {
-            outline: 'none',
-          },
-        },
-      },
-      defaultProps: {
-        disableRipple: true,
-      },
-    },
-    MuiIconButton: {
-      styleOverrides: {
-        root: {
-          '&:focus': {
-            outline: 'none',
-          },
-        },
-      },
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          textTransform: 'none',
-          '&:focus': {
-            outline: 'none',
-            boxShadow: 'none',
-          },
-        },
-      },
-    },
-    MuiAppBar: {
-      styleOverrides: {
-        root: {
-          backgroundColor: '#1e1e1e',
-        },
-      },
-    },
-  },
-});
-
-const ThemeContext = createContext<ThemeContextType>({
-  isDarkMode: false,
-  toggleTheme: () => {},
-  theme: lightTheme,
-});
-
-export const useAppTheme = () => useContext(ThemeContext);
+export const useAppTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error('useAppTheme must be used within a ThemeProvider');
+  }
+  return context;
+};
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isDarkMode, setIsDarkMode] = useState(() => {
-    const saved = localStorage.getItem('darkMode');
-    return saved ? JSON.parse(saved) : false;
-  });
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    localStorage.setItem('darkMode', JSON.stringify(!isDarkMode));
-  };
-
-  const theme = isDarkMode ? darkTheme : lightTheme;
-
-  useEffect(() => {
-    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
-  }, [isDarkMode]);
+  const theme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          primary: {
+            main: '#2196f3',
+            light: '#64b5f6',
+            dark: '#1976d2',
+            contrastText: '#fff',
+          },
+          secondary: {
+            main: '#f50057',
+            light: '#ff4081',
+            dark: '#c51162',
+            contrastText: '#fff',
+          },
+          success: {
+            main: '#4caf50',
+            light: '#81c784',
+            dark: '#388e3c',
+            contrastText: '#fff',
+          },
+          error: {
+            main: '#f44336',
+            light: '#e57373',
+            dark: '#d32f2f',
+            contrastText: '#fff',
+          },
+          warning: {
+            main: '#ff9800',
+            light: '#ffb74d',
+            dark: '#f57c00',
+            contrastText: '#fff',
+          },
+          info: {
+            main: '#2196f3',
+            light: '#64b5f6',
+            dark: '#1976d2',
+            contrastText: '#fff',
+          },
+          background: {
+            default: '#f5f5f5',
+            paper: '#ffffff',
+          },
+          text: {
+            primary: '#212121',
+            secondary: '#757575',
+          },
+        },
+        typography: {
+          fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+          h6: {
+            fontWeight: 500,
+            fontSize: '1.25rem',
+          },
+          button: {
+            textTransform: 'none',
+            fontWeight: 500,
+          },
+        },
+        components: {
+          MuiAppBar: {
+            styleOverrides: {
+              root: {
+                backgroundColor: '#2196f3',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              },
+            },
+          },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                borderRadius: 8,
+                textTransform: 'none',
+              },
+            },
+          },
+          MuiIconButton: {
+            styleOverrides: {
+              root: {
+                padding: 8,
+              },
+            },
+          },
+        },
+      }),
+    []
+  );
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme, theme }}>
+    <ThemeContext.Provider value={{ theme }}>
       <MuiThemeProvider theme={theme}>
         <CssBaseline />
         {children}

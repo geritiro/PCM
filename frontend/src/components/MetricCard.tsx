@@ -4,7 +4,6 @@ import {
   CardContent,
   Typography,
   Box,
-  LinearProgress,
   IconButton,
   Tooltip,
 } from '@mui/material';
@@ -14,61 +13,94 @@ interface MetricCardProps {
   title: string;
   value: string;
   icon: React.ReactNode;
-  progress?: number;
   subtitle?: string;
-  info?: string;
+  showInfo?: boolean;
 }
 
 export const MetricCard: React.FC<MetricCardProps> = ({
   title,
   value,
   icon,
-  progress,
   subtitle,
-  info,
+  showInfo = false,
 }) => {
   return (
-    <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Box sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            color: 'primary.main',
-            mr: 1 
-          }}>
+    <Card 
+      elevation={0}
+      sx={{ 
+        height: '100%',
+        bgcolor: 'background.paper',
+        border: '1px solid',
+        borderColor: 'divider',
+        borderRadius: 2,
+      }}
+    >
+      <CardContent sx={{ p: 2 }}>
+        <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+          <Box 
+            sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              color: 'primary.main',
+              mr: 1,
+              '& svg': {
+                fontSize: '1.5rem',
+              }
+            }}
+          >
             {icon}
           </Box>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          <Typography 
+            variant="subtitle1" 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              fontWeight: 500,
+              fontSize: '0.875rem',
+              color: 'text.primary',
+            }}
+          >
             {title}
-            {info && (
-              <Tooltip title={info} arrow placement="top">
-                <IconButton size="small" sx={{ ml: 1 }}>
-                  <InfoIcon fontSize="small" />
-                </IconButton>
-              </Tooltip>
-            )}
           </Typography>
+          {showInfo && (
+            <Tooltip title="Mais informações" arrow placement="top">
+              <IconButton 
+                size="small" 
+                sx={{ 
+                  ml: 1,
+                  p: 0.5,
+                  color: 'action.active',
+                }}
+              >
+                <InfoIcon sx={{ fontSize: '1rem' }} />
+              </IconButton>
+            </Tooltip>
+          )}
         </Box>
-        
-        <Typography variant="h4" component="div" sx={{ mb: 1 }}>
+
+        <Typography 
+          variant="h4" 
+          component="div"
+          sx={{ 
+            fontWeight: 500,
+            mb: 0.5,
+            color: 'text.primary',
+          }}
+        >
           {value}
         </Typography>
-        
+
         {subtitle && (
-          <Typography variant="body2" color="text.secondary">
+          <Typography 
+            variant="body2" 
+            color="text.secondary"
+            sx={{ 
+              fontSize: '0.75rem',
+              fontWeight: 400,
+            }}
+          >
             {subtitle}
           </Typography>
-        )}
-        
-        {progress !== undefined && (
-          <Box sx={{ mt: 2 }}>
-            <LinearProgress 
-              variant="determinate" 
-              value={progress} 
-              sx={{ height: 8, borderRadius: 4 }}
-            />
-          </Box>
         )}
       </CardContent>
     </Card>

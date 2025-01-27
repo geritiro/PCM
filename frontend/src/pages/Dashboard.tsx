@@ -1,9 +1,17 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Box,
   Grid,
-  Paper,
   Typography,
+  Button,
+  Stack,
+  Paper,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
+  SelectChangeEvent,
+  Container
 } from '@mui/material';
 import {
   MonetizationOn as MonetizationOnIcon,
@@ -12,20 +20,24 @@ import {
   Timeline as TimelineIcon,
   Update as UpdateIcon,
   Pending as PendingIcon,
+  Add as AddIcon,
+  Insights as InsightsIcon,
+  Message as MessageIcon,
+  Build as BuildIcon,
+  Settings as SettingsIcon,
+  Paid as PaidIcon
 } from '@mui/icons-material';
 import { MetricCard } from '../components/MetricCard';
 import { MaintenanceFilter } from '../components/filters/MaintenanceFilter';
+import { MaintenanceCostChart } from '../components/charts/MaintenanceCostChart';
+import { TotalCard } from '../components/TotalCard';
+import { MAINTENANCE_AREAS, MaintenanceArea } from '../types/maintenance';
 import inventory from '../data/inventory.json';
 
-interface Equipment {
-  code: string;
-  name: string;
-  type: string;
-  power: number | null;
-  sector: string;
-  manufacturingYear: number;
-  energyCostPerHour: number | null;
-}
+const MONTHS = [
+  'Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho',
+  'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
+];
 
 export const Dashboard = () => {
   const [selectedFilters, setSelectedFilters] = useState({
@@ -35,159 +47,315 @@ export const Dashboard = () => {
   });
   const [selectedYear, setSelectedYear] = useState(2024);
   const [selectedMonth, setSelectedMonth] = useState(1);
-  const [selectedArea, setSelectedArea] = useState('TODAS');
+  const [selectedGraphArea, setSelectedGraphArea] = useState<MaintenanceArea>('TODAS');
 
-  // Dados estáticos memoizados
-  const staticData = useMemo(() => ({
-    totalValue: 156789.50,
-    maintenanceCost: 23456.78,
-    energyCost: 34567.89,
-    availability: 98.5,
-    reliability: 95.2,
-    performance: 92.8,
-  }), []);
-
-  // Lista de equipamentos memoizada
-  const equipments = useMemo(() => {
-    return [
-      { id: '', name: 'Selecione...' },
-      ...inventory.equipment.map(eq => ({
-        id: eq.code,
-        name: eq.name
-      }))
-    ];
-  }, []);
-
-  // Função de filtro memoizada
-  const getAvailableEquipments = useCallback((equipmentNumber: 1 | 2 | 3) => {
-    const selectedEquipments = [
-      selectedFilters.equipment1,
-      selectedFilters.equipment2,
-      selectedFilters.equipment3
-    ];
-
-    const otherSelectedEquipments = selectedEquipments.filter((_, index) => 
-      index !== equipmentNumber - 1
-    );
-
-    return equipments.filter(eq => 
-      eq.id === '' || !otherSelectedEquipments.includes(eq.id)
-    );
-  }, [selectedFilters, equipments]);
-
-  // Função de mudança de filtro memoizada
-  const handleFilterChange = useCallback((filters: { 
-    year?: number; 
-    month?: number;
-    area?: string;
-    equipment1?: string;
-    equipment2?: string;
-    equipment3?: string;
-  }) => {
-    if (filters.year !== undefined) setSelectedYear(filters.year);
-    if (filters.month !== undefined) setSelectedMonth(filters.month);
-    if (filters.area !== undefined) setSelectedArea(filters.area);
-    if (filters.equipment1 !== undefined || filters.equipment2 !== undefined || filters.equipment3 !== undefined) {
-      setSelectedFilters(prev => ({
-        ...prev,
-        ...(filters.equipment1 !== undefined && { equipment1: filters.equipment1 }),
-        ...(filters.equipment2 !== undefined && { equipment2: filters.equipment2 }),
-        ...(filters.equipment3 !== undefined && { equipment3: filters.equipment3 })
-      }));
+  // Dados mockados para os totais
+  const mockTotalData = {
+    totalGeral: 89674.75,
+    totalPorArea: {
+      'TODAS': 89674.75,
+      'MECÂNICA': 15600.00,
+      'ELÉTRICA': 28900.00,
+      'HIDRÁULICA': 8874.75,
+      'ELETRÔNICA': 12500.00,
+      'PNEUMÁTICA': 7500.00,
+      'INSTRUMENTAÇÃO': 9800.00,
+      'AUTOMAÇÃO': 6500.00,
     }
-  }, []);
+  };
 
-  // Valores calculados memoizados
-  const calculatedValues = useMemo(() => {
-    const baseValue = staticData.totalValue;
-    const equipmentMultiplier = [selectedFilters.equipment1, selectedFilters.equipment2, selectedFilters.equipment3]
-      .filter(Boolean).length * 0.15;
-    
-    return {
-      totalValue: baseValue * (1 + equipmentMultiplier),
-      maintenanceCost: staticData.maintenanceCost * (1 + equipmentMultiplier),
-      energyCost: staticData.energyCost * (1 + equipmentMultiplier),
-      availability: staticData.availability,
-      reliability: staticData.reliability,
-      performance: staticData.performance
-    };
-  }, [selectedFilters, staticData]);
+  const handleFilterChange = (filters: any) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      ...filters
+    }));
+  };
+
+  const handleGraphAreaChange = (event: SelectChangeEvent) => {
+    setSelectedGraphArea(event.target.value as MaintenanceArea);
+  };
+
+  const getAvailableEquipments = (equipmentNumber: 1 | 2 | 3) => {
+    // Simulando uma lista de equipamentos
+    return [
+      { id: '', name: 'Nenhum' },
+      { id: 'PRENSA P2', name: 'PRENSA P2' },
+      { id: 'PRENSA P3', name: 'PRENSA P3' },
+      { id: 'TORNO CNC', name: 'TORNO CNC' },
+      { id: 'FRESA', name: 'FRESA' },
+    ];
+  };
+
+  const getSelectedEquipments = () => {
+    return Object.values(selectedFilters).filter(Boolean);
+  };
+
+  // Calcula o total atual baseado nos filtros
+  const currentTotal = useMemo(() => {
+    const baseTotal = mockTotalData.totalGeral;
+    const selectedEquips = getSelectedEquipments();
+    return selectedEquips.length > 0 
+      ? baseTotal * (selectedEquips.length / 3) 
+      : baseTotal;
+  }, [selectedFilters]);
+
+  // Calcula o total do gráfico baseado na área selecionada
+  const graphTotal = useMemo(() => {
+    return mockTotalData.totalPorArea[selectedGraphArea] || 0;
+  }, [selectedGraphArea]);
 
   return (
-    <Box sx={{ p: 3 }}>
-      <MaintenanceFilter
-        selectedYear={selectedYear}
-        selectedMonth={selectedMonth}
-        selectedArea={selectedArea}
-        selectedEquipment1={selectedFilters.equipment1}
-        selectedEquipment2={selectedFilters.equipment2}
-        selectedEquipment3={selectedFilters.equipment3}
-        onFilterChange={handleFilterChange}
-        getAvailableEquipments={getAvailableEquipments}
-      />
+    <Container maxWidth={false} sx={{ p: 3 }}>
+      {/* Cabeçalho com título e total */}
+      <Box sx={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center',
+        mb: 3,
+      }}>
+        <Typography variant="h4" component="h1">
+          Dashboard PCM
+        </Typography>
+        
+        <TotalCard
+          title="Total em Janeiro"
+          value={currentTotal}
+          sx={{
+            minWidth: 250,
+            height: 'auto',
+            '& .MuiCardContent-root': {
+              py: 1,
+            },
+          }}
+        />
+      </Box>
 
-      <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12} sm={6} md={4}>
-          <MetricCard
-            title="Valor Total"
-            value={calculatedValues.totalValue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            icon={<MonetizationOnIcon />}
-            progress={75}
-            subtitle="Últimos 30 dias"
-            info="Total gasto com manutenção no período"
+      {/* Linha de botões e filtros */}
+      <Box sx={{ 
+        display: 'flex',
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: { xs: 2, md: 3 },
+        mb: 3,
+      }}>
+        <Stack 
+          direction={{ xs: 'column', sm: 'row' }} 
+          spacing={2}
+          sx={{ 
+            width: { xs: '100%', md: 'auto' },
+            minWidth: { md: '420px' },
+          }}
+        >
+          <Button
+            variant="contained"
+            color="success"
+            startIcon={<AddIcon />}
+            fullWidth
+            sx={{ 
+              textTransform: 'none',
+              height: 42,
+              fontSize: '0.95rem',
+              '&:focus': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
+              '& .MuiButton-startIcon': {
+                marginRight: 1,
+              },
+            }}
+          >
+            Nova OS
+          </Button>
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ 
+              bgcolor: '#9c27b0',
+              '&:hover': {
+                bgcolor: '#7b1fa2',
+              },
+              textTransform: 'none',
+              height: 42,
+              fontSize: '0.95rem',
+              '&:focus': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
+              '& .MuiButton-startIcon': {
+                marginRight: 1,
+              },
+            }}
+            startIcon={<InsightsIcon />}
+          >
+            Insights
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            startIcon={<MessageIcon />}
+            fullWidth
+            sx={{ 
+              textTransform: 'none',
+              height: 42,
+              fontSize: '0.95rem',
+              '&:focus': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
+              '&.Mui-focusVisible': {
+                outline: 'none',
+                boxShadow: 'none',
+              },
+              '& .MuiButton-startIcon': {
+                marginRight: 1,
+              },
+            }}
+          >
+            Mensagem
+          </Button>
+        </Stack>
+
+        <Box sx={{ 
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: { xs: 'column', sm: 'row' },
+          gap: 2,
+        }}>
+          <MaintenanceFilter
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            selectedEquipment1={selectedFilters.equipment1 || ''}
+            selectedEquipment2={selectedFilters.equipment2 || ''}
+            selectedEquipment3={selectedFilters.equipment3 || ''}
+            onFilterChange={handleFilterChange}
+            getAvailableEquipments={getAvailableEquipments}
           />
+        </Box>
+      </Box>
+
+      {/* Grid de cards */}
+      <Grid container spacing={3} sx={{ mb: 3 }}>
+        {/* Coluna da Esquerda - 40% */}
+        <Grid item xs={12} md={5}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} sm={6}>
+              <MetricCard
+                title="OS Críticas"
+                value="5"
+                icon={<MonetizationOnIcon />}
+                subtitle="Necessitam atenção imediata"
+                showInfo
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <MetricCard
+                title="Total de OS em Aberto"
+                value="28"
+                icon={<EngineeringIcon />}
+                subtitle={`${MONTHS[selectedMonth - 1]}/${selectedYear}`}
+                showInfo
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <MetricCard
+                title="OS em Andamento"
+                value="12"
+                icon={<SpeedIcon />}
+                subtitle="Em execução"
+                showInfo
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <MetricCard
+                title="Disponibilidade"
+                value="98.5%"
+                icon={<TimelineIcon />}
+                subtitle="Disponibilidade de Equipamentos"
+                showInfo
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <MetricCard
+                title="MTBF"
+                value="120h"
+                icon={<UpdateIcon />}
+                subtitle="Tempo Médio entre Falhas"
+                showInfo
+              />
+            </Grid>
+            <Grid item xs={12} sm={6}>
+              <MetricCard
+                title="MTTR"
+                value="4h"
+                icon={<PendingIcon />}
+                subtitle="Tempo Médio de Reparo"
+                showInfo
+              />
+            </Grid>
+          </Grid>
         </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MetricCard
-            title="Custo de Manutenção"
-            value={calculatedValues.maintenanceCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            icon={<EngineeringIcon />}
-            progress={50}
-            subtitle="Últimos 30 dias"
-            info="Custo total com manutenção no período"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MetricCard
-            title="Custo de Energia"
-            value={calculatedValues.energyCost.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-            icon={<SpeedIcon />}
-            progress={25}
-            subtitle="Últimos 30 dias"
-            info="Custo total com energia no período"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MetricCard
-            title="Disponibilidade"
-            value={`${calculatedValues.availability}%`}
-            icon={<TimelineIcon />}
-            progress={calculatedValues.availability}
-            subtitle="Últimos 30 dias"
-            info="Disponibilidade dos equipamentos no período"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MetricCard
-            title="Confiabilidade"
-            value={`${calculatedValues.reliability}%`}
-            icon={<UpdateIcon />}
-            progress={calculatedValues.reliability}
-            subtitle="Últimos 30 dias"
-            info="Confiabilidade dos equipamentos no período"
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4}>
-          <MetricCard
-            title="Desempenho"
-            value={`${calculatedValues.performance}%`}
-            icon={<PendingIcon />}
-            progress={calculatedValues.performance}
-            subtitle="Últimos 30 dias"
-            info="Desempenho dos equipamentos no período"
-          />
+
+        {/* Coluna da Direita - Gráfico - 60% */}
+        <Grid item xs={12} md={7}>
+          <Paper 
+            elevation={1} 
+            sx={{ 
+              p: 2,
+              height: { xs: 'auto', md: '400px' },
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <Box sx={{ 
+              display: 'flex',
+              alignItems: 'center',
+              mb: 2,
+              flexDirection: { xs: 'column', sm: 'row' },
+              gap: 2,
+            }}>
+              <Typography variant="h6" component="h2">
+                Custos por Área de Manutenção
+              </Typography>
+              
+              <FormControl 
+                size="small" 
+                sx={{ 
+                  minWidth: 200,
+                  ml: { sm: 'auto' },
+                }}
+              >
+                <InputLabel>Área</InputLabel>
+                <Select
+                  value={selectedGraphArea}
+                  label="Área"
+                  onChange={handleGraphAreaChange}
+                >
+                  <MenuItem value="TODAS">Todas</MenuItem>
+                  {MAINTENANCE_AREAS.map(area => (
+                    <MenuItem key={area} value={area}>{area}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Box>
+
+            <Box sx={{ flexGrow: 1, minHeight: '300px' }}>
+              <MaintenanceCostChart
+                selectedArea={selectedGraphArea}
+                selectedYear={selectedYear}
+                selectedMonth={selectedMonth}
+                selectedEquipments={getSelectedEquipments()}
+              />
+            </Box>
+          </Paper>
         </Grid>
       </Grid>
-    </Box>
+    </Container>
   );
 };
